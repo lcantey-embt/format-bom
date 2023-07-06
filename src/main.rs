@@ -26,8 +26,11 @@ fn main() {
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
+    path: Option<String>,
     #[arg(short, long, required = false)]
     recursive: bool,
+    #[arg(long, required = false)]
+    option: Option<String>,
 }
 
 /// remove utf-8 BOM mark of given file
