@@ -25,7 +25,10 @@ fn main() {
 /// ```
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-struct Args {}
+struct Args {
+    #[arg(short, long, required = false)]
+    recursive: bool,
+}
 
 /// remove utf-8 BOM mark of given file
 fn remove_bom<P: AsRef<Path>>(path: P) -> Result<()> {
