@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 mod checker;
+mod explorer;
 mod fixer;
 
 use clap::Parser;
