@@ -2,6 +2,7 @@
 
 mod checker;
 mod explorer;
+mod fix_rule;
 mod fixer;
 
 use clap::Parser;
@@ -11,6 +12,7 @@ use std::path::Path;
 
 fn main() {
     let args = Args::parse();
+    let fix_rule = fix_rule::set_fix_rule(&args.option).unwrap();
 }
 
 #[derive(Parser, Debug)]
