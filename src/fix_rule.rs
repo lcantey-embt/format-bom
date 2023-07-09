@@ -1,7 +1,12 @@
 use std::env;
 
 pub fn set_fix_rule(fix_option: &Option<String>) -> Result<FixRule, Box<dyn std::error::Error>> {
-    let enviornment = get_enviornment(fix_option)?;
+    let enviornment_result = get_enviornment(fix_option);
+    if (enviornment_result.is_err()) {
+        return Err(enviornment_result.err().unwrap());
+    }
+    let enviornment = enviornment_result.unwrap();
+
     let mut fix_rule = FixRule {
         enviornment: enviornment,
         rules: Vec::new(),
