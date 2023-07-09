@@ -1,11 +1,13 @@
 use std::env;
 
 pub fn set_fix_rule(fix_option: &Option<String>) -> Result<FixRule, Box<dyn std::error::Error>> {
-    let enviornment_result = get_enviornment(fix_option);
-    if (enviornment_result.is_err()) {
-        return Err(enviornment_result.err().unwrap());
+    let get_enviornment_result = get_enviornment(fix_option);
+    if (get_enviornment_result.is_err()) {
+        return Err(get_enviornment_result.err().unwrap());
     }
-    let enviornment = enviornment_result.unwrap();
+    let enviornment = get_enviornment_result.unwrap();
+
+    let get_fix_rule_of_file_result = get_fix_rule_of_file(&enviornment);
 
     let mut fix_rule = FixRule {
         enviornment: enviornment,
@@ -54,6 +56,12 @@ fn parse_option(fix_option: &str) -> Result<Enviornment, Box<dyn std::error::Err
         "unix" => Ok(Enviornment::Unix),
         _ => Err("Unknown option.".into()),
     }
+}
+
+fn get_fix_rule_of_file(
+    enviornment: &Enviornment,
+) -> Result<Vec<FixRuleOfFile>, Box<dyn std::error::Error>> {
+    todo!()
 }
 
 #[cfg(test)]
