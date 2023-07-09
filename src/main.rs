@@ -6,19 +6,25 @@ mod fix_rule;
 mod fixer;
 
 use clap::Parser;
-use std::fs::File;
-use std::io::{BufReader, BufWriter, Read, Result, Write};
-use std::path::Path;
+use fix_rule::FixMod;
 
 fn main() {
     let args = Args::parse();
-    let fix_rule = fix_rule::set_fix_rule(&args.option).unwrap();
+    let fix_rule = fix_rule::set_fix_rule(&args).unwrap();
 }
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
-struct Args {
+pub struct Args {
     path: Option<String>,
-    #[arg(short, long, required = false)]
-    option: Option<String>,
+    #[arg(long, required = false)]
+    add: bool,
+    #[arg(long, required = false)]
+    remove: bool,
+    #[arg(long, required = false)]
+    add_strict: bool,
+    #[arg(long, required = false)]
+    add_bom: Option<Vec<String>>,
+    #[arg(long, required = false)]
+    remove_bom: Option<Vec<String>>,
 }

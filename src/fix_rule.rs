@@ -1,24 +1,22 @@
-use std::env;
+use std::collections::HashMap;
 
-pub fn set_fix_rule(fix_option: &Option<String>) -> Result<FixRule, Box<dyn std::error::Error>> {
-    let get_enviornment_result = get_enviornment(fix_option);
-    if (get_enviornment_result.is_err()) {
-        return Err(get_enviornment_result.err().unwrap());
-    }
-    let enviornment = get_enviornment_result.unwrap();
+use crate::Args;
 
-    let get_fix_rule_of_file_result = get_fix_rule_of_file(&enviornment);
-
-    let mut fix_rule = FixRule {
-        enviornment: enviornment,
-        rules: Vec::new(),
+pub fn set_fix_rule(fix_option: &Args) -> Result<FixRule, Box<dyn std::error::Error>> {
+    let fix_mode = match (get_fix_mode(fix_option)) {
+        Ok(fix_mode) => fix_mode,
+        Err(err) => return Err(err),
+    };
+    let fix_rule = FixRule {
+        fix_mod: fix_mode,
+        rules: HashMap::new(),
     };
     return Ok(fix_rule);
 }
 
 pub struct FixRule {
-    pub enviornment: Enviornment,
-    pub rules: Vec<FixRuleOfFile>,
+    pub fix_mod: FixMod,
+    pub rules: HashMap<String, bool>,
 }
 
 pub struct FixRuleOfFile {
@@ -27,72 +25,113 @@ pub struct FixRuleOfFile {
 }
 
 #[derive(PartialEq, Debug)]
-pub enum Enviornment {
-    Windows,
-    Unix,
+pub enum FixMod {
+    Add,
+    Remove,
+    AddStrict,
 }
 
-fn get_enviornment(fix_option: &Option<String>) -> Result<Enviornment, Box<dyn std::error::Error>> {
-    if (fix_option.is_none()) {
-        return get_os();
+fn get_fix_mode(fix_option: &Args) -> Result<FixMod, Box<dyn std::error::Error>> {
+    let mode: [bool; 3] = [fix_option.add, fix_option.remove, fix_option.add_strict];
+
+    if mode.into_iter().filter(|&x| x).count() > 1 {
+        return Err("You can not set multiple fix mode.".into());
+    } else if (fix_option.add) {
+        return Ok(FixMod::Add);
+    } else if (fix_option.remove) {
+        return Ok(FixMod::Remove);
+    } else if (fix_option.add_strict) {
+        return Ok(FixMod::AddStrict);
     } else {
-        let option = fix_option.as_ref().unwrap();
-        return parse_option(option);
+        return Ok(FixMod::Remove);
     }
-}
-
-fn get_os() -> Result<Enviornment, Box<dyn std::error::Error>> {
-    let os_type = std::env::consts::OS;
-    match (os_type) {
-        "windows" => Ok(Enviornment::Windows),
-        "linux" | "macos" => Ok(Enviornment::Unix),
-        _ => Err("Unknown OS type.".into()),
-    }
-}
-
-fn parse_option(fix_option: &str) -> Result<Enviornment, Box<dyn std::error::Error>> {
-    match (fix_option) {
-        "windows" => Ok(Enviornment::Windows),
-        "unix" => Ok(Enviornment::Unix),
-        _ => Err("Unknown option.".into()),
-    }
-}
-
-fn get_fix_rule_of_file(
-    enviornment: &Enviornment,
-) -> Result<Vec<FixRuleOfFile>, Box<dyn std::error::Error>> {
-    todo!()
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn test_set_fix_option_as_windows() {
-        let fix_option = Some("windows".to_string());
+    fn test_set_mode() {
+        let args = Args {
+            path: None,
+            add: false,
+            remove: false,
+            add_strict: false,
+            add_bom: None,
+            remove_bom: None,
+        };
 
-        let fix_rule = super::set_fix_rule(&fix_option);
+        let fix_rule = set_fix_rule(&args).unwrap();
 
-        assert_eq!(fix_rule.is_ok(), true);
-        assert_eq!(fix_rule.unwrap().enviornment, super::Enviornment::Windows);
+        assert_eq!(fix_rule.fix_mod, FixMod::Remove);
     }
 
     #[test]
-    fn test_set_fix_option_as_unix() {
-        let fix_option = Some("unix".to_string());
+    fn test_set_mode_as_add() {
+        let args = Args {
+            path: None,
+            add: true,
+            remove: false,
+            add_strict: false,
+            add_bom: None,
+            remove_bom: None,
+        };
 
-        let fix_rule = super::set_fix_rule(&fix_option);
+        let fix_rule = set_fix_rule(&args).unwrap();
 
-        assert_eq!(fix_rule.is_ok(), true);
-        assert_eq!(fix_rule.unwrap().enviornment, super::Enviornment::Unix);
+        assert_eq!(fix_rule.fix_mod, FixMod::Add);
     }
 
     #[test]
-    fn test_can_not_set_fix_option() {
-        let fix_option = Some("foo".to_string());
+    fn test_set_mode_as_remove() {
+        let args = Args {
+            path: None,
+            add: false,
+            remove: true,
+            add_strict: false,
+            add_bom: None,
+            remove_bom: None,
+        };
 
-        let fix_rule = super::set_fix_rule(&fix_option);
+        let fix_rule = set_fix_rule(&args).unwrap();
 
-        assert_eq!(fix_rule.is_err(), true);
-        assert_eq!(fix_rule.err().unwrap().to_string(), "Unknown option.");
+        assert_eq!(fix_rule.fix_mod, FixMod::Remove);
+    }
+
+    #[test]
+    fn test_set_mode_as_add_strict() {
+        let args = Args {
+            path: None,
+            add: false,
+            remove: false,
+            add_strict: true,
+            add_bom: None,
+            remove_bom: None,
+        };
+
+        let fix_rule = set_fix_rule(&args).unwrap();
+
+        assert_eq!(fix_rule.fix_mod, FixMod::AddStrict);
+    }
+
+    #[test]
+    fn test_can_not_set_fix_rule_with_multiple_fix_flags() {
+        let args = Args {
+            path: None,
+            add: true,
+            remove: false,
+            add_strict: true,
+            add_bom: None,
+            remove_bom: None,
+        };
+
+        let fix_rule_result = set_fix_rule(&args);
+
+        assert_eq!(fix_rule_result.is_err(), true);
+        assert_eq!(
+            fix_rule_result.err().unwrap().to_string(),
+            "You can not set multiple fix mode."
+        );
     }
 }

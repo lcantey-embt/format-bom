@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::{BufReader, BufWriter, Read, Result, Write};
+use std::io::{Read, Result};
 use std::path::Path;
 
 pub fn is_buf_utf8(buf: &Vec<u8>) -> Result<bool> {
