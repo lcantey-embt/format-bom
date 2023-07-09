@@ -26,50 +26,21 @@ pub enum Enviornment {
 }
 
 fn get_enviornment(fix_option: &Option<String>) -> Result<Enviornment, Box<dyn std::error::Error>> {
-    let mut enviornment: Enviornment;
-
     if (fix_option.is_none()) {
-        let get_os_result = get_os();
-        match get_os_result {
-            Ok(enviornment_ok) => {
-                enviornment = enviornment_ok;
-            }
-            Err(e) => {
-                return Err(e);
-            }
-        }
+        return get_os();
     } else {
         let option = fix_option.as_ref().unwrap();
-        let parse_option_result = parse_option(option);
-        match parse_option_result {
-            Ok(enviornment_ok) => {
-                enviornment = enviornment_ok;
-            }
-            Err(e) => {
-                return Err(e);
-            }
-        }
+        return parse_option(option);
     }
-    Ok(enviornment)
 }
 
 fn get_os() -> Result<Enviornment, Box<dyn std::error::Error>> {
-    let mut enviornment: Enviornment;
-
     let os_type = std::env::consts::OS;
     match (os_type) {
-        "windows" => {
-            enviornment = Enviornment::Windows;
-        }
-        "linux" | "macos" => {
-            enviornment = Enviornment::Unix;
-        }
-        _ => {
-            return Err("Unknown OS type.".into());
-        }
+        "windows" => Ok(Enviornment::Windows),
+        "linux" | "macos" => Ok(Enviornment::Unix),
+        _ => Err("Unknown OS type.".into()),
     }
-
-    Ok(enviornment)
 }
 
 fn parse_option(fix_option: &str) -> Result<Enviornment, Box<dyn std::error::Error>> {
