@@ -6,7 +6,6 @@ mod fix_rule;
 mod fixer;
 
 use clap::Parser;
-use fix_rule::FixMod;
 
 fn main() {
     let args = Args::parse();
