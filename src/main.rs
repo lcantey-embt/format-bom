@@ -9,7 +9,7 @@ use clap::Parser;
 
 fn main() {
     let args = Args::parse();
-    let fix_rule = fix_rule::set_fix_rule(&args).unwrap();
+    let fix_rule = fix_rule::parse_fix_rule(&args).unwrap();
 }
 
 #[derive(Parser, Debug)]
