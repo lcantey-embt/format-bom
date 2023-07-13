@@ -9,7 +9,7 @@ use std::{
 
 /// Get all files in a directory.
 pub fn get_file_list(path: &PathBuf) -> Vec<PathBuf> {
-    let walker = WalkBuilder::new(path).git_ignore(true).build();
+    let walker = WalkBuilder::new(path).build();
     let mut file_list: Vec<PathBuf> = Vec::new();
     for result_entry in walker {
         if let Ok(entry) = result_entry {
