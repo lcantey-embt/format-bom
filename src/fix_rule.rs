@@ -108,12 +108,7 @@ impl FixRule {
                 self.remove.insert(ext.to_string());
             }
         }
-
-        self.remove.insert("html".to_string());
-        self.remove.insert("css".to_string());
-        self.remove.insert("js".to_string());
-        self.remove.insert("ts".to_string());
-
+        self.remove.remove_default();
         self.mode = FixMode::Add;
         Ok(())
     }
@@ -146,6 +141,19 @@ impl FixRule {
 
         self.mode = FixMode::Add;
         Ok(())
+    }
+}
+
+trait HashSetExt {
+    fn remove_default(&mut self);
+}
+
+impl HashSetExt for HashSet<String> {
+    fn remove_default(&mut self) {
+        self.insert("html".to_string());
+        self.insert("css".to_string());
+        self.insert("js".to_string());
+        self.insert("ts".to_string());
     }
 }
 
