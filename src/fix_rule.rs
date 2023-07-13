@@ -46,10 +46,10 @@ fn get_fix_rule(argument: &Args, fix_mode_args: &FixModeArgs) -> Result<FixRule,
         FixModeArgs::AddStrict => fix_rule.set_fix_rule_for_add_strict(argument),
     };
 
-    return match result_set {
+    match result_set {
         Ok(_) => Ok(fix_rule),
         Err(err) => Err(err),
-    };
+    }
 }
 
 fn get_fix_rule_remove(argument: &Args) -> Result<FixRule, Box<dyn Error>> {
@@ -78,14 +78,14 @@ fn get_fix_rule_remove(argument: &Args) -> Result<FixRule, Box<dyn Error>> {
         add,
         remove,
     };
-    return Ok(fix_rule);
+    Ok(fix_rule)
 }
 
 fn get_fix_mode(fix_option: &Args) -> Result<FixModeArgs, Box<dyn std::error::Error>> {
     let mode: [bool; 3] = [fix_option.add, fix_option.remove, fix_option.add_strict];
 
     if mode.into_iter().filter(|&x| x).count() > 1 {
-        return Err("You can not set multiple fix mode.".into());
+        Err("You can not set multiple fix mode.".into())
     } else if (fix_option.add) {
         return Ok(FixModeArgs::Add);
     } else if (fix_option.remove) {
@@ -115,7 +115,7 @@ impl FixRule {
         self.remove.insert("ts".to_string());
 
         self.mode = FixMode::Add;
-        return Ok(());
+        Ok(())
     }
 
     fn set_fix_rule_for_remove(&mut self, argument: &Args) -> Result<(), Box<dyn Error>> {
@@ -130,7 +130,7 @@ impl FixRule {
         }
 
         self.mode = FixMode::Remove;
-        return Ok(());
+        Ok(())
     }
 
     fn set_fix_rule_for_add_strict(&mut self, argument: &Args) -> Result<(), Box<dyn Error>> {
@@ -145,7 +145,7 @@ impl FixRule {
         }
 
         self.mode = FixMode::Add;
-        return Ok(());
+        Ok(())
     }
 }
 

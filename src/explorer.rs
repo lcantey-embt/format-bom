@@ -8,7 +8,7 @@ pub fn get_file_list(path: &PathBuf) -> Vec<PathBuf> {
     let gitignore_pattern = generate_gitignore_regex_patterns(&PathBuf::from(".gitignore"));
 
     dir_list.push(path.clone());
-    while 0 < dir_list.len() {
+    while !dir_list.is_empty() {
         let dir = dir_list.pop().unwrap();
         let paths = std::fs::read_dir(dir).unwrap();
         for path in paths {
@@ -51,14 +51,14 @@ fn generate_gitignore_regex_patterns(gitignore_file: &PathBuf) -> Vec<Regex> {
         return patterns;
     }
     let gitignore = std::fs::read_to_string(gitignore_file).unwrap();
-    let gitignore = gitignore.split("\n");
+    let gitignore = gitignore.split('\n');
     for line in gitignore {
-        if line == "" {
+        if line.is_empty() {
             continue;
         }
-        let line = line.replace(".", "\\.");
-        let line = line.replace("*", ".*");
-        let line = line.replace("?", ".");
+        let line = line.replace('.', "\\.");
+        let line = line.replace('*', ".*");
+        let line = line.replace('?', ".");
         let line = format!("^{}$", line);
         let re = Regex::new(&line).unwrap();
         patterns.push(re);
