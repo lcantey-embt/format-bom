@@ -6,10 +6,13 @@ mod fix_rule;
 mod fixer;
 
 use clap::Parser;
+use std::path::{Path, PathBuf};
 
 fn main() {
     let args = Args::parse();
     let fix_rule = fix_rule::parse_fix_rule(&args).unwrap();
+    let files =
+        explorer::get_file_list(&PathBuf::from(args.path.unwrap_or_else(|| ".".to_string())));
 }
 
 #[derive(Parser, Debug)]

@@ -1,55 +1,58 @@
+use std::error::Error;
 use std::fs::File;
-use std::io::{BufReader, BufWriter, Read, Result, Write};
-use std::path::Path;
+use std::io::{self, BufReader, BufWriter, Read, Write};
+use std::path::{Path, PathBuf};
+
+use tempfile::NamedTempFile;
 
 /// remove utf-8 BOM mark of given file
-pub fn remove_bom<P: AsRef<Path>>(path: P) -> Result<()> {
-    let mut reader = BufReader::new(File::open(&path)?);
+pub fn remove_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
+    let mut reader = get_file_reader(path)?;
 
-    let mut buf = [0; 3];
+    let mut buf = vec![0; BOM.len()];
     reader.read_exact(&mut buf)?;
 
-    let mut contents = Vec::new();
-    if buf != [0xEF, 0xBB, 0xBF] {
-        contents.extend_from_slice(&buf);
+    if &buf != BOM {
+        return Ok(false);
     }
-    reader.read_to_end(&mut contents)?;
 
-    let mut writer = BufWriter::new(File::create(path)?);
-    writer.write_all(&contents)?;
+    let mut temp_file = NamedTempFile::new()?;
+    {
+        let mut writer = BufWriter::new(&mut temp_file);
+        io::copy(&mut reader, &mut writer)?;
+    }
+    temp_file.persist(path)?;
 
-    Ok(())
+    Ok(true)
 }
 
 /// add utf-8 BOM mark to given file if the file is utf-8 encoded
-pub fn add_bom<P: AsRef<Path>>(path: P) -> Result<()> {
-    let mut reader = BufReader::new(File::open(&path)?);
+pub fn add_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
+    let mut reader = get_file_reader(path)?;
 
-    let mut buf = Vec::new();
-    reader.read_to_end(&mut buf)?;
+    let mut buf = vec![0; BOM.len()];
+    reader.read_exact(&mut buf)?;
 
-    // Check if the file is UTF-8 encoded
-    let utf8_check = String::from_utf8(buf.clone());
-    if utf8_check.is_err() {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::InvalidData,
-            "File is not UTF-8 encoded",
-        ));
+    if &buf == BOM {
+        return Ok(false);
     }
 
-    let mut bom_bytes = [0; 3];
-    bom_bytes.copy_from_slice(&buf[0..3]);
-
-    let mut contents = Vec::new();
-    if bom_bytes != [0xEF, 0xBB, 0xBF] {
-        contents.extend_from_slice(&[0xEF, 0xBB, 0xBF]); // add BOM
-        contents.extend_from_slice(&buf); // add the original contents
-    } else {
-        contents.extend_from_slice(&buf); // if BOM was already there, just add original contents
+    let mut temp_file = NamedTempFile::new()?;
+    {
+        let mut writer = BufWriter::new(&mut temp_file);
+        writer.write_all(BOM)?; // Write BOM
+        writer.write_all(&buf)?; // Write the already read bytes
+        io::copy(&mut reader, &mut writer)?; // Copy the rest of the file
     }
+    temp_file.persist(&path)?;
 
-    let mut writer = BufWriter::new(File::create(path)?);
-    writer.write_all(&contents)?;
+    Ok(true)
+}
 
-    Ok(())
+const BOM: &[u8] = b"\xEF\xBB\xBF";
+
+fn get_file_reader(path: &Path) -> Result<BufReader<File>, Box<dyn Error>> {
+    File::open(path)
+        .and_then(|file| Ok(BufReader::new(file)))
+        .map_err(|e| e.into())
 }
