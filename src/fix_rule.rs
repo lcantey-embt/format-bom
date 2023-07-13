@@ -6,15 +6,7 @@ use std::{
 use crate::Args;
 
 pub fn parse_fix_rule(argument: &Args) -> Result<FixRule, Box<dyn std::error::Error>> {
-    let fix_mode_args = match (get_fix_mode(argument)) {
-        Ok(fix_mode_args) => fix_mode_args,
-        Err(err) => return Err(err),
-    };
-    let fix_rule = match (get_fix_rule(argument, &fix_mode_args)) {
-        Ok(fix_rule) => fix_rule,
-        Err(err) => return Err(err),
-    };
-    return Ok(fix_rule);
+    get_fix_mode(argument).and_then(|fix_mode_args| get_fix_rule(argument, &fix_mode_args))
 }
 
 pub struct FixRule {
