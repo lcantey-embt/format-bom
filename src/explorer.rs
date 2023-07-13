@@ -1,25 +1,20 @@
+use ignore::WalkBuilder;
 use regex::Regex;
-use std::path::PathBuf;
+use std::{
+    error::Error,
+    fs::File,
+    io::{self, BufReader},
+    path::{Path, PathBuf},
+};
 
 /// Get all files in a directory.
 pub fn get_file_list(path: &PathBuf) -> Vec<PathBuf> {
+    let walker = WalkBuilder::new(path).git_ignore(true).build();
     let mut file_list: Vec<PathBuf> = Vec::new();
-    let mut dir_list: Vec<PathBuf> = Vec::new();
-    let gitignore_pattern = generate_gitignore_regex_patterns(&PathBuf::from(".gitignore"));
-
-    dir_list.push(path.clone());
-    while !dir_list.is_empty() {
-        let dir = dir_list.pop().unwrap();
-        let paths = std::fs::read_dir(dir).unwrap();
-        for path in paths {
-            let path = path.unwrap().path();
-            if is_ignored_by_gitignore(&path, &gitignore_pattern) {
-                continue;
-            }
-            if path.is_dir() {
-                dir_list.push(path);
-            } else {
-                file_list.push(path);
+    for result_entry in walker {
+        if let Ok(entry) = result_entry {
+            if entry.file_type().unwrap().is_file() {
+                file_list.push(entry.into_path());
             }
         }
     }
@@ -53,7 +48,7 @@ fn generate_gitignore_regex_patterns(gitignore_file: &PathBuf) -> Vec<Regex> {
     let gitignore = std::fs::read_to_string(gitignore_file).unwrap();
     let gitignore = gitignore.split('\n');
     for line in gitignore {
-        if line.is_empty() {
+        if line.starts_with('#') || line.trim().is_empty() {
             continue;
         }
         let line = line.replace('.', "\\.");
