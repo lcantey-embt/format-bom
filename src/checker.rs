@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::fs::File;
 use std::io::{Read, Result};
 use std::path::Path;

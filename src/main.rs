@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 mod checker;
 mod explorer;
 mod fix_rule;
@@ -7,7 +5,7 @@ mod fixer;
 mod formatter;
 
 use clap::Parser;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn main() {
     let args = Args::parse();

@@ -1,11 +1,6 @@
 use ignore::WalkBuilder;
 use regex::Regex;
-use std::{
-    error::Error,
-    fs::File,
-    io::{self, BufReader},
-    path::{Path, PathBuf},
-};
+use std::path::PathBuf;
 
 /// Get all files in a directory.
 pub fn get_file_list(path: &PathBuf) -> Vec<PathBuf> {
@@ -20,6 +15,8 @@ pub fn get_file_list(path: &PathBuf) -> Vec<PathBuf> {
     }
     file_list
 }
+
+#[allow(unused)]
 
 /// Filter files by gitignore.
 fn filter_by_gitignore(file_list: Vec<PathBuf>) -> Vec<PathBuf> {

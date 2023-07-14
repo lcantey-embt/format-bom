@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    error::Error,
-};
+use std::{collections::HashSet, error::Error};
 
 use crate::Args;
 
@@ -13,11 +10,6 @@ pub struct FixRule {
     pub mode: FixMode,
     pub add: HashSet<String>,
     pub remove: HashSet<String>,
-}
-
-pub struct FixRuleOfFile {
-    pub extension: String,
-    pub remove_bom: bool,
 }
 
 #[derive(PartialEq, Debug)]
@@ -33,6 +25,22 @@ enum FixModeArgs {
     AddStrict,
 }
 
+fn get_fix_mode(fix_option: &Args) -> Result<FixModeArgs, Box<dyn std::error::Error>> {
+    let mode: [bool; 3] = [fix_option.add, fix_option.remove, fix_option.add_strict];
+
+    if mode.into_iter().filter(|&x| x).count() > 1 {
+        Err("You can not set multiple fix mode.".into())
+    } else if fix_option.add {
+        return Ok(FixModeArgs::Add);
+    } else if fix_option.remove {
+        return Ok(FixModeArgs::Remove);
+    } else if fix_option.add_strict {
+        return Ok(FixModeArgs::AddStrict);
+    } else {
+        return Ok(FixModeArgs::Remove);
+    }
+}
+
 fn get_fix_rule(argument: &Args, fix_mode_args: &FixModeArgs) -> Result<FixRule, Box<dyn Error>> {
     let mut fix_rule = FixRule {
         mode: FixMode::Remove,
@@ -40,7 +48,7 @@ fn get_fix_rule(argument: &Args, fix_mode_args: &FixModeArgs) -> Result<FixRule,
         remove: HashSet::new(),
     };
 
-    let result_set = match (fix_mode_args) {
+    let result_set = match fix_mode_args {
         FixModeArgs::Add => fix_rule.set_fix_rule_for_add(argument),
         FixModeArgs::Remove => fix_rule.set_fix_rule_for_remove(argument),
         FixModeArgs::AddStrict => fix_rule.set_fix_rule_for_add_strict(argument),
@@ -49,51 +57,6 @@ fn get_fix_rule(argument: &Args, fix_mode_args: &FixModeArgs) -> Result<FixRule,
     match result_set {
         Ok(_) => Ok(fix_rule),
         Err(err) => Err(err),
-    }
-}
-
-fn get_fix_rule_remove(argument: &Args) -> Result<FixRule, Box<dyn Error>> {
-    if argument.remove_bom.is_some() {
-        return Err("You can not set add_bom with add mode.".into());
-    }
-
-    let mut add: HashSet<String> = HashSet::new();
-    let mut remove: HashSet<String> = HashSet::new();
-
-    if let Some(remove_bom) = &argument.remove_bom {
-        let mut remove_bom_hashset = remove_bom
-            .iter()
-            .map(|x| x.to_string())
-            .collect::<HashSet<String>>();
-        remove.union(&remove_bom_hashset);
-    }
-
-    remove.insert("html".to_string());
-    remove.insert("css".to_string());
-    remove.insert("js".to_string());
-    remove.insert("ts".to_string());
-
-    let fix_rule = FixRule {
-        mode: FixMode::Add,
-        add,
-        remove,
-    };
-    Ok(fix_rule)
-}
-
-fn get_fix_mode(fix_option: &Args) -> Result<FixModeArgs, Box<dyn std::error::Error>> {
-    let mode: [bool; 3] = [fix_option.add, fix_option.remove, fix_option.add_strict];
-
-    if mode.into_iter().filter(|&x| x).count() > 1 {
-        Err("You can not set multiple fix mode.".into())
-    } else if (fix_option.add) {
-        return Ok(FixModeArgs::Add);
-    } else if (fix_option.remove) {
-        return Ok(FixModeArgs::Remove);
-    } else if (fix_option.add_strict) {
-        return Ok(FixModeArgs::AddStrict);
-    } else {
-        return Ok(FixModeArgs::Remove);
     }
 }
 
@@ -280,10 +243,6 @@ mod tests {
             add_bom: Some(vec!["cs".to_string()]),
             remove_bom: None,
         };
-        let expected_add = vec!["cs"]
-            .iter()
-            .map(|x| x.to_string())
-            .collect::<HashSet<String>>();
 
         let fix_rule_result = parse_fix_rule(&args);
         assert!(fix_rule_result.is_err());
@@ -323,10 +282,6 @@ mod tests {
             add_bom: None,
             remove_bom: Some(vec!["cs".to_string()]),
         };
-        let expected_remove = vec!["cs"]
-            .iter()
-            .map(|x| x.to_string())
-            .collect::<HashSet<String>>();
 
         let result_fix_rule = parse_fix_rule(&args);
         assert!(result_fix_rule.is_err());
