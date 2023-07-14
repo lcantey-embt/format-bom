@@ -1,4 +1,4 @@
-use std::error::Error;
+﻿use std::error::Error;
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Read, Write};
 use std::path::{Path, PathBuf};
@@ -22,7 +22,7 @@ pub fn remove_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
         io::copy(&mut reader, &mut writer)?;
     }
     temp_file.persist(path)?;
-
+    println!("Removed BOM from {}", path.display());
     Ok(true)
 }
 
@@ -45,7 +45,7 @@ pub fn add_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
         io::copy(&mut reader, &mut writer)?; // Copy the rest of the file
     }
     temp_file.persist(&path)?;
-
+    println!("Added BOM to {}", path.display());
     Ok(true)
 }
 

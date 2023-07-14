@@ -1,4 +1,4 @@
-use std::{error::Error, path::PathBuf};
+﻿use std::{error::Error, path::PathBuf};
 
 use crate::{
     fix_rule::{FixMode, FixRule},
@@ -65,13 +65,11 @@ impl<'a> BomFormatter<'a> {
 
     fn format(&self) -> Result<(), Box<dyn Error>> {
         for file in &self.files_to_add_bom {
-            fixer::add_bom(file)?;
-            println!("Add BOM to {}", file.display());
+            _ = fixer::add_bom(file);
         }
 
         for file in &self.files_to_remove_bom {
-            fixer::remove_bom(file)?;
-            println!("Remove BOM from {}", file.display());
+            _ = fixer::remove_bom(file)?;
         }
 
         Ok(())
