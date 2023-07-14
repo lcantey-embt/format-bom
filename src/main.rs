@@ -4,6 +4,7 @@ mod checker;
 mod explorer;
 mod fix_rule;
 mod fixer;
+mod formatter;
 
 use clap::Parser;
 use std::path::{Path, PathBuf};
@@ -13,6 +14,7 @@ fn main() {
     let fix_rule = fix_rule::parse_fix_rule(&args).unwrap();
     let files =
         explorer::get_file_list(&PathBuf::from(args.path.unwrap_or_else(|| ".".to_string())));
+    _ = formatter::format_bom(&files, &fix_rule);
 }
 
 #[derive(Parser, Debug)]
