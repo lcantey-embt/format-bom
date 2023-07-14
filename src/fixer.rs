@@ -46,6 +46,7 @@ pub fn add_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
     let mut temp_file = NamedTempFile::new()?;
     {
         let mut writer = BufWriter::new(&mut temp_file);
+        writer.write_all(BOM)?;
         writer.write_all(&buf)?;
     }
     temp_file.persist(&path)?;
