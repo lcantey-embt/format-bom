@@ -1,4 +1,4 @@
-﻿use crate::checker;
+use crate::checker;
 use std::error::Error;
 use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Read, Write};
@@ -46,7 +46,7 @@ pub fn add_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
     let mut temp_file = NamedTempFile::new()?;
     {
         let mut writer = BufWriter::new(&mut temp_file);
-        writer.write_all(&buf)?; // Write the already read bytes
+        writer.write_all(&buf)?;
     }
     temp_file.persist(&path)?;
     println!("Added BOM to {}", path.display());
