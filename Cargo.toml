@@ -1,6 +1,6 @@
 [package]
 name = "format-bom"
-version = "0.0.1"
+version = "0.0.3"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 author = ["Dosang Gu <ddos0418@gmail.com>"]
