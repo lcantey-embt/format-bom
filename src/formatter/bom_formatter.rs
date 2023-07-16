@@ -31,8 +31,8 @@ impl<'a> BomFormatter<'a> {
         let files_etc: Vec<&PathBuf> = files
             .iter()
             .filter(|file| {
-                !self.fix_rule.add.contains(&get_extension(file))
-                    && !self.fix_rule.remove.contains(&get_extension(file))
+                !self.fix_rule.ext_add.contains(&get_extension(file))
+                    && !self.fix_rule.ext_remove.contains(&get_extension(file))
             })
             .collect();
 
@@ -57,7 +57,7 @@ impl<'a> BomFormatter<'a> {
     fn register_add_bom(&mut self, files: &'a Vec<PathBuf>) {
         let files_to_add_bom: Vec<&PathBuf> = files
             .iter()
-            .filter(|&file| self.fix_rule.add.contains(&get_extension(file)))
+            .filter(|&file| self.fix_rule.ext_add.contains(&get_extension(file)))
             .collect();
         self.files_to_add_bom.extend(files_to_add_bom);
     }
@@ -65,7 +65,7 @@ impl<'a> BomFormatter<'a> {
     fn register_remove_bom(&mut self, files: &'a Vec<PathBuf>) {
         let files_to_remove_bom: Vec<&PathBuf> = files
             .iter()
-            .filter(|&file| self.fix_rule.remove.contains(&get_extension(file)))
+            .filter(|&file| self.fix_rule.ext_remove.contains(&get_extension(file)))
             .collect();
         self.files_to_remove_bom.extend(files_to_remove_bom);
     }

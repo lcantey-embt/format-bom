@@ -5,8 +5,8 @@ use std::{collections::HashSet, error::Error};
 
 pub struct FixRule {
     pub mode: FixMode,
-    pub add: HashSet<String>,
-    pub remove: HashSet<String>,
+    pub ext_add: HashSet<String>,
+    pub ext_remove: HashSet<String>,
 }
 
 impl FixRule {
@@ -17,10 +17,10 @@ impl FixRule {
 
         if let Some(remove_bom) = &argument.remove_bom {
             for ext in remove_bom {
-                self.remove.insert(ext.to_string());
+                self.ext_remove.insert(ext.to_string());
             }
         }
-        self.remove.remove_default();
+        self.ext_remove.remove_default();
         self.mode = FixMode::Add;
         Ok(())
     }
@@ -32,7 +32,7 @@ impl FixRule {
 
         if let Some(add_bom) = &argument.add_bom {
             for ext in add_bom {
-                self.add.insert(ext.to_string());
+                self.ext_add.insert(ext.to_string());
             }
         }
 
@@ -47,7 +47,7 @@ impl FixRule {
 
         if let Some(remove_bom) = &argument.remove_bom {
             for ext in remove_bom {
-                self.remove.insert(ext.to_string());
+                self.ext_remove.insert(ext.to_string());
             }
         }
 

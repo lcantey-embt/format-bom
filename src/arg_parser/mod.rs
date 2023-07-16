@@ -32,8 +32,8 @@ fn get_fix_mode(fix_option: &Args) -> Result<FixModeArgs, Box<dyn std::error::Er
 fn get_fix_rule(argument: &Args, fix_mode_args: &FixModeArgs) -> Result<FixRule, Box<dyn Error>> {
     let mut fix_rule = FixRule {
         mode: FixMode::Remove,
-        add: HashSet::new(),
-        remove: HashSet::new(),
+        ext_add: HashSet::new(),
+        ext_remove: HashSet::new(),
     };
 
     let result_set = match fix_mode_args {
@@ -93,7 +93,7 @@ mod tests {
         let fix_rule = parse_args(&args).unwrap();
 
         assert_eq!(fix_rule.mode, FixMode::Add);
-        assert_eq!(fix_rule.remove, expected_remove);
+        assert_eq!(fix_rule.ext_remove, expected_remove);
     }
 
     #[test]
@@ -126,7 +126,7 @@ mod tests {
         let fix_rule = parse_args(&args).unwrap();
 
         assert_eq!(fix_rule.mode, FixMode::Add);
-        assert_eq!(fix_rule.remove, HashSet::new());
+        assert_eq!(fix_rule.ext_remove, HashSet::new());
     }
 
     #[test]
@@ -165,7 +165,7 @@ mod tests {
 
         let fix_rule = parse_args(&args).unwrap();
         assert_eq!(fix_rule.mode, FixMode::Remove);
-        assert_eq!(fix_rule.add, expected_add);
+        assert_eq!(fix_rule.ext_add, expected_add);
     }
 
     #[test]
@@ -212,7 +212,7 @@ mod tests {
 
         let fix_rule = parse_args(&args).unwrap();
         assert_eq!(fix_rule.mode, FixMode::Add);
-        assert_eq!(fix_rule.remove, expected_remove);
+        assert_eq!(fix_rule.ext_remove, expected_remove);
     }
 
     #[test]
@@ -251,7 +251,7 @@ mod tests {
 
         let fix_rule = parse_args(&args).unwrap();
         assert_eq!(fix_rule.mode, FixMode::Add);
-        assert_eq!(fix_rule.remove, expected_remove);
+        assert_eq!(fix_rule.ext_remove, expected_remove);
     }
 
     #[test]
