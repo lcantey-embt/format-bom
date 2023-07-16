@@ -113,44 +113,18 @@ trait HashSetExt {
 
 impl HashSetExt for HashSet<String> {
     fn remove_default(&mut self) {
-        // web development
-        self.insert("html".to_string());
-        self.insert("css".to_string());
-        self.insert("svg".to_string());
+        let defaults = vec![
+            "html", "css", "svg", // web development
+            "js", "ts", // programming language
+            "md", // document
+            "json", "toml", "yaml", "csv", "xml", // data
+            "ini", "conf", "cfg", // config
+            "sh", "bat", "ps1", // other
+        ];
 
-        // programming language
-        self.insert("c".to_string());
-        self.insert("cpp".to_string());
-        self.insert("cs".to_string());
-        self.insert("go".to_string());
-        self.insert("java".to_string());
-        self.insert("py".to_string());
-        self.insert("rs".to_string());
-        self.insert("js".to_string());
-        self.insert("ts".to_string());
-        self.insert("rb".to_string());
-        self.insert("swift".to_string());
-
-        // document
-        self.insert("md".to_string());
-        self.insert("txt".to_string());
-
-        // data
-        self.insert("json".to_string());
-        self.insert("toml".to_string());
-        self.insert("yaml".to_string());
-        self.insert("csv".to_string());
-        self.insert("xml".to_string());
-
-        // config
-        self.insert("ini".to_string());
-        self.insert("conf".to_string());
-        self.insert("cfg".to_string());
-
-        // other
-        self.insert("sh".to_string());
-        self.insert("bat".to_string());
-        self.insert("ps1".to_string());
+        for default in defaults {
+            self.insert(default.to_string());
+        }
     }
 }
 
@@ -184,10 +158,17 @@ mod tests {
             add_bom: None,
             remove_bom: None,
         };
-        let expected_remove = vec!["html", "css", "js", "ts"]
-            .iter()
-            .map(|x| x.to_string())
-            .collect::<HashSet<String>>();
+        let expected_remove = vec![
+            "html", "css", "svg", // web development
+            "js", "ts", // programming language
+            "md", // document
+            "json", "toml", "yaml", "csv", "xml", // data
+            "ini", "conf", "cfg", // config
+            "sh", "bat", "ps1", // other
+        ]
+        .iter()
+        .map(|x| x.to_string())
+        .collect::<HashSet<String>>();
 
         let fix_rule = parse_fix_rule(&args).unwrap();
 
@@ -296,10 +277,18 @@ mod tests {
             add_bom: None,
             remove_bom: Some(vec!["cs".to_string()]),
         };
-        let expected_remove = vec!["html", "css", "js", "ts", "cs"]
-            .iter()
-            .map(|x| x.to_string())
-            .collect::<HashSet<String>>();
+        let expected_remove = vec![
+            "html", "css", "svg", // web development
+            "js", "ts", // programming language
+            "md", // document
+            "json", "toml", "yaml", "csv", "xml", // data
+            "ini", "conf", "cfg", // config
+            "sh", "bat", "ps1", // other
+            "cs",
+        ]
+        .iter()
+        .map(|x| x.to_string())
+        .collect::<HashSet<String>>();
 
         let fix_rule = parse_fix_rule(&args).unwrap();
         assert_eq!(fix_rule.mode, FixMode::Add);
