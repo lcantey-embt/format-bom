@@ -22,8 +22,6 @@ jobs:
     needs: test
     steps:
       - uses: actions/checkout@v3
-      - name: Build
-        run: cargo build --release
       - name: Login to crates.io
         run: cargo login ${{ secrets.CRATES_IO_TOKEN }}
       - name: Deploy to crates.io
