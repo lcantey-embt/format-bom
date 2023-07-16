@@ -1,7 +1,6 @@
 mod checker;
 mod explorer;
 mod fix_rule;
-mod fixer;
 mod formatter;
 
 use clap::Parser;
