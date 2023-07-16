@@ -16,6 +16,8 @@ cargo install format-bom
 format-bom 
 ```
 
+You can check help message by `format-bom --help`.
+
 ### Format Mode
 
 ```bash
@@ -47,3 +49,15 @@ It uses `remove` mode by default.
 - ps1
 
 `add-strict` mode adds BOM to all UTF-8 files.
+
+### Handling files with specific extensions
+
+You can specify extensions of files to add or remove BOM manually by `--add-bom` or `--remove-bom` option.
+
+```bash
+format-bom --add-bom cs,csproj,text
+```
+
+```bash
+format-bom --add --remove-bom xaml
+```
