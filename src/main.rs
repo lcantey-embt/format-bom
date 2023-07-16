@@ -16,15 +16,16 @@ fn main() {
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
+    #[clap(required = false)]
     path: Option<String>,
-    #[arg(long, required = false)]
+    #[clap(long, required = false)]
     add: bool,
-    #[arg(long, required = false)]
+    #[clap(long, required = false)]
     remove: bool,
-    #[arg(long, required = false)]
+    #[clap(long, required = false, value_parser, value_delimiter = ',')]
     add_strict: bool,
-    #[arg(long, required = false)]
+    #[clap(long, required = false, value_parser, value_delimiter = ',')]
     add_bom: Option<Vec<String>>,
-    #[arg(long, required = false)]
+    #[clap(long, required = false)]
     remove_bom: Option<Vec<String>>,
 }
