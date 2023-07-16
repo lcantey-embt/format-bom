@@ -1,28 +1,16 @@
-﻿use std::{collections::HashSet, error::Error};
+mod fix_mode;
+mod fix_mode_args;
+mod fix_rule;
+
+pub use fix_mode::FixMode;
+use fix_mode_args::FixModeArgs;
+pub use fix_rule::FixRule;
+use std::{collections::HashSet, error::Error};
 
 use crate::Args;
 
-pub fn parse_fix_rule(argument: &Args) -> Result<FixRule, Box<dyn std::error::Error>> {
+pub fn parse_args(argument: &Args) -> Result<FixRule, Box<dyn std::error::Error>> {
     get_fix_mode(argument).and_then(|fix_mode_args| get_fix_rule(argument, &fix_mode_args))
-}
-
-pub struct FixRule {
-    pub mode: FixMode,
-    pub add: HashSet<String>,
-    pub remove: HashSet<String>,
-}
-
-#[derive(PartialEq, Debug)]
-pub enum FixMode {
-    Add,
-    Remove,
-}
-
-#[derive(PartialEq, Debug)]
-enum FixModeArgs {
-    Add,
-    Remove,
-    AddStrict,
 }
 
 fn get_fix_mode(fix_option: &Args) -> Result<FixModeArgs, Box<dyn std::error::Error>> {
@@ -60,74 +48,6 @@ fn get_fix_rule(argument: &Args, fix_mode_args: &FixModeArgs) -> Result<FixRule,
     }
 }
 
-impl FixRule {
-    fn set_fix_rule_for_add(&mut self, argument: &Args) -> Result<(), Box<dyn Error>> {
-        if argument.add_bom.is_some() {
-            return Err("You can not set add_bom with add mode.".into());
-        }
-
-        if let Some(remove_bom) = &argument.remove_bom {
-            for ext in remove_bom {
-                self.remove.insert(ext.to_string());
-            }
-        }
-        self.remove.remove_default();
-        self.mode = FixMode::Add;
-        Ok(())
-    }
-
-    fn set_fix_rule_for_remove(&mut self, argument: &Args) -> Result<(), Box<dyn Error>> {
-        if argument.remove_bom.is_some() {
-            return Err("You can not set remove_bom with remove mode.".into());
-        }
-
-        if let Some(add_bom) = &argument.add_bom {
-            for ext in add_bom {
-                self.add.insert(ext.to_string());
-            }
-        }
-
-        self.mode = FixMode::Remove;
-        Ok(())
-    }
-
-    fn set_fix_rule_for_add_strict(&mut self, argument: &Args) -> Result<(), Box<dyn Error>> {
-        if argument.add_bom.is_some() {
-            return Err("You can not set add_bom with add-strict mode.".into());
-        }
-
-        if let Some(remove_bom) = &argument.remove_bom {
-            for ext in remove_bom {
-                self.remove.insert(ext.to_string());
-            }
-        }
-
-        self.mode = FixMode::Add;
-        Ok(())
-    }
-}
-
-trait HashSetExt {
-    fn remove_default(&mut self);
-}
-
-impl HashSetExt for HashSet<String> {
-    fn remove_default(&mut self) {
-        let defaults = vec![
-            "html", "css", "svg", // web development
-            "js", "ts", // programming language
-            "md", // document
-            "json", "toml", "yaml", "csv", "xml", // data
-            "ini", "conf", "cfg", // config
-            "sh", "bat", "ps1", // other
-        ];
-
-        for default in defaults {
-            self.insert(default.to_string());
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -143,7 +63,7 @@ mod tests {
             remove_bom: None,
         };
 
-        let fix_rule = parse_fix_rule(&args).unwrap();
+        let fix_rule = parse_args(&args).unwrap();
 
         assert_eq!(fix_rule.mode, FixMode::Remove);
     }
@@ -170,7 +90,7 @@ mod tests {
         .map(|x| x.to_string())
         .collect::<HashSet<String>>();
 
-        let fix_rule = parse_fix_rule(&args).unwrap();
+        let fix_rule = parse_args(&args).unwrap();
 
         assert_eq!(fix_rule.mode, FixMode::Add);
         assert_eq!(fix_rule.remove, expected_remove);
@@ -187,7 +107,7 @@ mod tests {
             remove_bom: None,
         };
 
-        let fix_rule = parse_fix_rule(&args).unwrap();
+        let fix_rule = parse_args(&args).unwrap();
 
         assert_eq!(fix_rule.mode, FixMode::Remove);
     }
@@ -203,7 +123,7 @@ mod tests {
             remove_bom: None,
         };
 
-        let fix_rule = parse_fix_rule(&args).unwrap();
+        let fix_rule = parse_args(&args).unwrap();
 
         assert_eq!(fix_rule.mode, FixMode::Add);
         assert_eq!(fix_rule.remove, HashSet::new());
@@ -220,7 +140,7 @@ mod tests {
             remove_bom: None,
         };
 
-        let fix_rule_result = parse_fix_rule(&args);
+        let fix_rule_result = parse_args(&args);
         assert_eq!(fix_rule_result.is_err(), true);
         assert_eq!(
             fix_rule_result.err().unwrap().to_string(),
@@ -243,7 +163,7 @@ mod tests {
             .map(|x| x.to_string())
             .collect::<HashSet<String>>();
 
-        let fix_rule = parse_fix_rule(&args).unwrap();
+        let fix_rule = parse_args(&args).unwrap();
         assert_eq!(fix_rule.mode, FixMode::Remove);
         assert_eq!(fix_rule.add, expected_add);
     }
@@ -259,7 +179,7 @@ mod tests {
             remove_bom: None,
         };
 
-        let fix_rule_result = parse_fix_rule(&args);
+        let fix_rule_result = parse_args(&args);
         assert!(fix_rule_result.is_err());
         assert_eq!(
             fix_rule_result.err().unwrap().to_string(),
@@ -290,7 +210,7 @@ mod tests {
         .map(|x| x.to_string())
         .collect::<HashSet<String>>();
 
-        let fix_rule = parse_fix_rule(&args).unwrap();
+        let fix_rule = parse_args(&args).unwrap();
         assert_eq!(fix_rule.mode, FixMode::Add);
         assert_eq!(fix_rule.remove, expected_remove);
     }
@@ -306,7 +226,7 @@ mod tests {
             remove_bom: Some(vec!["cs".to_string()]),
         };
 
-        let result_fix_rule = parse_fix_rule(&args);
+        let result_fix_rule = parse_args(&args);
         assert!(result_fix_rule.is_err());
         assert_eq!(
             result_fix_rule.err().unwrap().to_string(),
@@ -329,7 +249,7 @@ mod tests {
             .map(|x| x.to_string())
             .collect::<HashSet<String>>();
 
-        let fix_rule = parse_fix_rule(&args).unwrap();
+        let fix_rule = parse_args(&args).unwrap();
         assert_eq!(fix_rule.mode, FixMode::Add);
         assert_eq!(fix_rule.remove, expected_remove);
     }
@@ -345,7 +265,7 @@ mod tests {
             remove_bom: Some(vec!["html".to_string()]),
         };
 
-        let fix_rule_result = parse_fix_rule(&args);
+        let fix_rule_result = parse_args(&args);
         assert!(fix_rule_result.is_err());
         assert_eq!(
             fix_rule_result.err().unwrap().to_string(),
@@ -364,7 +284,7 @@ mod tests {
             remove_bom: Some(vec!["html".to_string()]),
         };
 
-        let fix_rule_result = parse_fix_rule(&args);
+        let fix_rule_result = parse_args(&args);
         assert!(fix_rule_result.is_err());
         assert_eq!(
             fix_rule_result.err().unwrap().to_string(),
@@ -383,7 +303,7 @@ mod tests {
             remove_bom: Some(vec!["html".to_string()]),
         };
 
-        let fix_rule_result = parse_fix_rule(&args);
+        let fix_rule_result = parse_args(&args);
         assert!(fix_rule_result.is_err());
         assert_eq!(
             fix_rule_result.err().unwrap().to_string(),
