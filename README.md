@@ -4,6 +4,12 @@ utf-8 BOM formatter written in Rust
 
 ## Installation
 
+This tool provides with `cargo install` command.
+
+```bash
+cargo install format-bom
+```
+
 ## Usage
 
 ```bash
