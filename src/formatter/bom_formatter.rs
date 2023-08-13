@@ -45,10 +45,15 @@ impl<'a> BomFormatter<'a> {
     pub fn format(&self) -> Result<(), Box<dyn Error>> {
         for file in &self.files_to_add_bom {
             _ = add_bom(file);
+            if let Err(err) = add_bom(file) {
+                println!("adding bom failed: {}", err);
+            }
         }
 
         for file in &self.files_to_remove_bom {
-            _ = remove_bom(file)?;
+            if let Err(err) = remove_bom(file) {
+                println!("removing bom failed: {}", err);
+            }
         }
 
         Ok(())
@@ -81,6 +86,7 @@ fn get_extension(path: &PathBuf) -> String {
 
 /// remove utf-8 BOM mark of given file
 fn remove_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
+    println!("Removing BOM from {}", path.display());
     let mut reader = get_file_reader(path)?;
 
     let mut buf = vec![0; BOM.len()];
