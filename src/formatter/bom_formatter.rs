@@ -101,6 +101,8 @@ fn remove_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
         let mut writer = BufWriter::new(&mut temp_file);
         io::copy(&mut reader, &mut writer)?;
     }
+    drop(reader);
+
     temp_file.persist(path)?;
     println!("Removed BOM from {}", path.display());
     Ok(true)
@@ -122,6 +124,7 @@ fn add_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
     if is_buf_utf8(&buf) == false {
         return Ok(false);
     }
+    drop(reader);
 
     let mut temp_file = NamedTempFile::new_in(path.parent().unwrap())?;
     {
