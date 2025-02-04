@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::{self, BufReader, BufWriter, Read, Write};
 use std::path::Path;
 use std::path::PathBuf;
-use tempfile::NamedTempFile;
+use tempfile::{NamedTempFile, TempDir};
 
 const BOM: &[u8] = b"\xEF\xBB\xBF";
 
@@ -43,14 +43,18 @@ impl<'a> BomFormatter<'a> {
     }
 
     pub fn format(&self) -> Result<(), Box<dyn Error>> {
+        let tmp_dir = TempDir::new_in(".")?;
+
+        println!("temporary dir is {:?}", tmp_dir.path());
+
         for file in &self.files_to_add_bom {
-            if let Err(err) = add_bom(file) {
+            if let Err(err) = add_bom(file, &tmp_dir) {
                 println!("adding bom failed: {:?} {}", file, err);
             }
         }
 
         for file in &self.files_to_remove_bom {
-            if let Err(err) = remove_bom(file) {
+            if let Err(err) = remove_bom(file, &tmp_dir) {
                 println!("removing bom failed: {}", err);
             }
         }
@@ -85,7 +89,7 @@ fn get_extension(path: &Path) -> String {
 }
 
 /// remove utf-8 BOM mark of given file
-fn remove_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
+fn remove_bom(path: &PathBuf, tmp_dir: &TempDir) -> Result<bool, Box<dyn Error>> {
     println!("Removing BOM from {}", path.display());
     let mut reader = get_file_reader(path)?;
 
@@ -96,7 +100,7 @@ fn remove_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
         return Ok(false);
     }
 
-    let mut temp_file = NamedTempFile::new_in(path.parent().unwrap())?;
+    let mut temp_file = NamedTempFile::new_in(tmp_dir)?;
     {
         let mut writer = BufWriter::new(&mut temp_file);
         io::copy(&mut reader, &mut writer)?;
@@ -109,7 +113,7 @@ fn remove_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
 }
 
 /// add utf-8 BOM mark to given file if the file is utf-8 encoded
-fn add_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
+fn add_bom(path: &PathBuf, tmp_dir: &TempDir) -> Result<bool, Box<dyn Error>> {
     let mut reader = get_file_reader(path)?;
 
     let mut buf = vec![0; BOM.len()];
@@ -126,7 +130,7 @@ fn add_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
     }
     drop(reader);
 
-    let mut temp_file = NamedTempFile::new_in(path.parent().unwrap())?;
+    let mut temp_file = NamedTempFile::new_in(tmp_dir)?;
     {
         let mut writer = BufWriter::new(&mut temp_file);
         writer.write_all(BOM)?;
