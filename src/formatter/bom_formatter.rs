@@ -44,7 +44,6 @@ impl<'a> BomFormatter<'a> {
 
     pub fn format(&self) -> Result<(), Box<dyn Error>> {
         for file in &self.files_to_add_bom {
-            _ = add_bom(file);
             if let Err(err) = add_bom(file) {
                 println!("adding bom failed: {:?} {}", file, err);
             }
