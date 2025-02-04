@@ -62,7 +62,6 @@ impl<'a> BomFormatter<'a> {
         Ok(())
     }
 
-    // fn register_add_bom(&mut self, files: &'a Vec<PathBuf>) {
     fn register_add_bom(&mut self, files: &'a [PathBuf]) {
         let files_to_add_bom: Vec<&PathBuf> = files
             .iter()
