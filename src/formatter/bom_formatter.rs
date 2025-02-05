@@ -45,7 +45,7 @@ impl<'a> BomFormatter<'a> {
     pub fn format(&self) -> Result<(), Box<dyn Error>> {
         let tmp_dir = TempDir::new_in(".")?;
 
-        println!("temporary dir is {:?}", tmp_dir.path());
+        // println!("temporary dir is {:?}", tmp_dir.path());
 
         for file in &self.files_to_add_bom {
             if let Err(err) = add_bom(file, &tmp_dir) {
