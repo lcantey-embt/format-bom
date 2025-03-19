@@ -96,7 +96,7 @@ fn remove_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
         return Ok(false);
     }
 
-    let mut temp_file = NamedTempFile::new()?;
+    let mut temp_file = NamedTempFile::new_in(path.parent().unwrap())?;
     {
         let mut writer = BufWriter::new(&mut temp_file);
         io::copy(&mut reader, &mut writer)?;
@@ -123,7 +123,7 @@ fn add_bom(path: &PathBuf) -> Result<bool, Box<dyn Error>> {
         return Ok(false);
     }
 
-    let mut temp_file = NamedTempFile::new()?;
+    let mut temp_file = NamedTempFile::new_in(path.parent().unwrap())?;
     {
         let mut writer = BufWriter::new(&mut temp_file);
         writer.write_all(BOM)?;
