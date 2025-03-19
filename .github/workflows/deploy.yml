@@ -1,13 +1,13 @@
 name: Deply to crates.io
 
 concurrency:
-    group: deploy
-    cancel-in-progress: true
+  group: deploy
+  cancel-in-progress: true
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types:
+      - released
 
 jobs:
   test:
