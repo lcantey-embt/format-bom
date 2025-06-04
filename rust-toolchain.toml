@@ -1,0 +1,3 @@
+[toolchain]
+# last version of Rust that supports Windows 7
+channel = "1.75.0"
